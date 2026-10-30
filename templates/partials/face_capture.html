@@ -1,12 +1,18 @@
 <div class="face-capture mt-4">
   <h2 class="h5">Face image</h2>
   <p class="text-secondary small">Allow exactly one face in a well-lit image. Images are processed for an encoding and are not saved to disk.</p>
-  <div class="camera-frame"><video id="camera-preview" autoplay playsinline muted aria-label="Webcam preview"></video><canvas id="camera-canvas" hidden></canvas><div class="camera-placeholder" id="camera-placeholder">Camera preview will appear here</div></div>
+  <div class="camera-frame">
+    <video id="camera-preview" autoplay playsinline muted aria-label="Webcam preview"></video>
+    <img id="face-image-preview" alt="Captured face image preview" hidden>
+    <canvas id="camera-canvas" hidden></canvas>
+    <div class="camera-placeholder" id="camera-placeholder">Camera preview will appear here</div>
+  </div>
   <div class="d-flex flex-wrap gap-2 mt-3">
     <button class="btn btn-outline-primary" type="button" id="start-camera">Start webcam</button>
     <button class="btn btn-outline-primary" type="button" id="capture-camera" disabled>Capture frame</button>
     <label class="btn btn-outline-secondary mb-0" for="face-upload">Choose JPEG/PNG image</label>
     <input class="visually-hidden" type="file" id="face-upload" accept="image/jpeg,image/png">
   </div>
-  <p class="small text-secondary mt-2 mb-0">If webcam access is unavailable, use image upload. Never upload someone else's image without permission.</p>
+  <p class="small text-secondary mt-2 mb-0" id="camera-status" aria-live="polite">No image captured yet. If webcam access is unavailable, choose an image instead.</p>
+  <p class="small text-secondary mt-1 mb-0">Never upload someone else's image without permission.</p>
 </div>

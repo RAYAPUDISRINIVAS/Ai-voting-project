@@ -2,6 +2,7 @@
   const video = document.getElementById("camera-preview");
   const canvas = document.getElementById("camera-canvas");
   const imageField = document.getElementById("face-image");
+  const imagePreview = document.getElementById("face-image-preview");
   const startButton = document.getElementById("start-camera");
   const captureButton = document.getElementById("capture-camera");
   const fileInput = document.getElementById("face-upload");
@@ -20,43 +21,116 @@
     }
     if (captureButton) captureButton.disabled = true;
   };
+  const clearImage = () => {
+    imageField.value = "";
+    if (imagePreview) {
+      imagePreview.removeAttribute("src");
+      imagePreview.hidden = true;
+    }
+  };
+  const showCapturedImage = (imageData, message) => {
+    imageField.value = imageData;
+    if (imagePreview) {
+      imagePreview.src = imageData;
+      imagePreview.hidden = false;
+    }
+    video.hidden = true;
+    if (placeholder) placeholder.hidden = true;
+    if (startButton) startButton.textContent = "Retake with webcam";
+    showStatus(message);
+  };
 
   startButton?.addEventListener("click", async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       showStatus("Webcam access is unavailable in this browser. Choose an image instead.");
       return;
     }
+    stopCamera();
+    clearImage();
+    video.hidden = false;
+    if (imagePreview) imagePreview.hidden = true;
+    if (placeholder) placeholder.hidden = false;
+    startButton.disabled = true;
+    showStatus("Requesting webcam access…");
     try {
-      stopCamera();
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
       video.srcObject = stream;
-      video.hidden = false;
+      await video.play();
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        await new Promise((resolve, reject) => {
+          const timeout = window.setTimeout(() => {
+            cleanup();
+            reject(new Error("The webcam did not provide a frame in time."));
+          }, 10000);
+          const cleanup = () => {
+            window.clearTimeout(timeout);
+            video.removeEventListener("loadeddata", onLoaded);
+            video.removeEventListener("error", onError);
+          };
+          const onLoaded = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error("The webcam frame could not be read."));
+          };
+          video.addEventListener("loadeddata", onLoaded, { once: true });
+          video.addEventListener("error", onError, { once: true });
+        });
+      }
+      if (!video.videoWidth || !video.videoHeight) {
+        throw new Error("The webcam did not provide a usable image.");
+      }
       if (placeholder) placeholder.hidden = true;
-      if (captureButton) captureButton.disabled = false;
-      showStatus("Camera ready. Position one face in the frame.");
+      captureButton.disabled = false;
+      showStatus("Webcam ready. Center your face, then capture a frame.");
     } catch (error) {
-      showStatus(`Could not access the webcam (${error.name || "permission error"}). Choose an image instead.`);
+      stopCamera();
+      video.srcObject = null;
+      video.hidden = true;
+      if (placeholder) placeholder.hidden = false;
+      showStatus(`Could not capture from the webcam: ${error.message || error.name || "unknown error"}. Choose an image instead.`);
+    } finally {
+      startButton.disabled = false;
     }
   });
 
   captureButton?.addEventListener("click", () => {
-    if (!video.videoWidth || !video.videoHeight) {
-      showStatus("The webcam has not produced a frame yet. Wait and try again.");
+    if (!video.videoWidth || !video.videoHeight || video.readyState < 2) {
+      showStatus("The webcam has not produced a clear frame. Wait for the preview and try again.");
       return;
     }
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    imageField.value = canvas.toDataURL("image/jpeg", 0.9);
-    stopCamera();
-    showStatus("Image captured. Submit the form to continue.");
+    const scale = Math.min(1, 1280 / video.videoWidth, 960 / video.videoHeight);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    const context = canvas.getContext("2d");
+    if (!context) {
+      showStatus("Could not prepare the captured image. Please try again or choose an image.");
+      return;
+    }
+    try {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL("image/jpeg", 0.85);
+      if (!imageData || imageData === "data:,") {
+        throw new Error("The captured frame was empty.");
+      }
+      stopCamera();
+      video.srcObject = null;
+      showCapturedImage(imageData, "Image captured. Check the preview below; choose Retake with webcam to try again.");
+    } catch (error) {
+      showStatus(`Could not save the captured frame: ${error.message || "unknown error"}. Please try again.`);
+    }
   });
 
   fileInput?.addEventListener("change", () => {
     const file = fileInput.files?.[0];
     if (!file) return;
     if (!["image/jpeg", "image/png"].includes(file.type) || file.size > 4 * 1024 * 1024) {
-      imageField.value = "";
+      clearImage();
       fileInput.value = "";
       showStatus("Choose a JPEG or PNG image no larger than 4 MB.");
       return;
@@ -67,11 +141,11 @@
         showStatus("The selected image could not be read.");
         return;
       }
-      imageField.value = reader.result;
       stopCamera();
-      showStatus("Image ready. Submit the form to continue.");
+      video.srcObject = null;
+      showCapturedImage(reader.result, "Image ready. Check the preview below before submitting.");
     };
-    reader.onerror = () => showStatus("The selected image could not be read.");
+    reader.onerror = () => showStatus("The selected image could not be read. Try another image.");
     reader.readAsDataURL(file);
   });
 
