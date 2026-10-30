@@ -1,0 +1,2 @@
+# Optional: requires dlib; on Windows, install compatible CMake/C++ build tools first.
+face-recognition>=1.3.0,<2.0

@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Upload too large · CivicDemo{% endblock %}
+{% block content %}<div class="error-page"><div class="eyebrow">413</div><h1>Upload too large</h1><p>Choose an image smaller than 4 MB and try again.</p><a class="btn btn-primary" href="{{ url_for('index') }}">Return home</a></div>{% endblock %}

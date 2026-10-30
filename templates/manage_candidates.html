@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Manage candidates · CivicDemo{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">ADMINISTRATION</div><h1>Manage candidates</h1><p>Create candidates for an election, edit their details, or deactivate them. Votes are not editable.</p></div>
+<form method="post" enctype="multipart/form-data" class="panel-card mb-4">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2 class="h5 mb-3">Add candidate</h2>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label" for="election_id">Election</label><select class="form-select" id="election_id" name="election_id" required><option value="">Choose…</option>{% for election in elections %}<option value="{{ election.id }}">{{ election.title }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label" for="name">Name</label><input class="form-control" id="name" name="name" maxlength="120" required></div>
+    <div class="col-md-4"><label class="form-label" for="affiliation">Party or affiliation</label><input class="form-control" id="affiliation" name="affiliation" maxlength="120"></div>
+    <div class="col-md-6"><label class="form-label" for="profile_image">Profile image <span class="text-secondary">(optional, JPEG/PNG up to 4 MB)</span></label><input class="form-control" type="file" id="profile_image" name="profile_image" accept="image/jpeg,image/png"></div>
+    <div class="col-12"><label class="form-label" for="manifesto">Description or manifesto</label><textarea class="form-control" id="manifesto" name="manifesto" rows="3"></textarea></div>
+  </div>
+  <button class="btn btn-primary mt-3" type="submit">Add candidate</button>
+</form>
+<h2 class="section-title">Candidates</h2>
+<div class="table-responsive panel-card p-0"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Name</th><th>Election</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+{% for candidate in candidates %}
+<tr>
+  <td>{% if candidate.profile_image %}<img class="candidate-thumb" src="{{ url_for('static', filename='uploads/candidates/' ~ candidate.profile_image) }}" alt="">{% endif %}{{ candidate.name }}<small class="d-block text-secondary">{{ candidate.affiliation or "Independent" }}</small></td>
+  <td>{{ candidate.election.title }}</td><td>{{ "Active" if candidate.is_active else "Inactive" }}</td>
+  <td class="d-flex gap-2"><a class="btn btn-sm btn-outline-light" href="{{ url_for('admin.edit_candidate', candidate_id=candidate.id) }}">Edit</a><form method="post" action="{{ url_for('admin.toggle_candidate', candidate_id=candidate.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-warning" type="submit">{{ "Deactivate" if candidate.is_active else "Activate" }}</button></form></td>
+</tr>
+{% else %}<tr><td colspan="4" class="text-secondary">No candidates have been added.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

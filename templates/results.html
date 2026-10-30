@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Election results · CivicDemo{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">AGGREGATE RESULTS</div><h1>{{ election.title }}</h1><p>Database totals do not independently prove election integrity. This basic schema links voter identity to vote records and does not guarantee ballot secrecy.</p></div>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat-card"><span>Valid votes</span><strong>{{ results.valid_votes }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card"><span>Eligible voters</span><strong>{{ results.eligible }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card"><span>Turnout</span><strong>{{ "%.1f"|format(results.turnout) }}%</strong></div></div>
+</div>
+<div class="panel-card mb-4"><canvas id="results-chart" aria-label="Votes per candidate chart" role="img"></canvas></div>
+<div class="table-responsive panel-card p-0"><table class="table table-dark table-hover mb-0"><thead><tr><th>Candidate</th><th>Affiliation</th><th>Votes</th><th>Share of valid votes</th></tr></thead><tbody>
+{% for row in results.rows %}<tr><td>{{ row.candidate.name }}</td><td>{{ row.candidate.affiliation or "Independent" }}</td><td>{{ row.votes }}</td><td>{{ "%.1f"|format(row.percentage) }}%</td></tr>
+{% else %}<tr><td colspan="4" class="text-secondary">No candidates are configured.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if is_admin %}<a class="btn btn-outline-primary mt-3" href="{{ url_for('admin.export_results', election_id=election.id) }}">Export aggregate CSV</a>{% else %}<a class="btn btn-outline-primary mt-3" href="{{ url_for('index') }}">Home</a>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+const resultLabels = {{ results.rows | map(attribute="candidate") | map(attribute="name") | list | tojson }};
+const resultValues = {{ results.rows | map(attribute="votes") | list | tojson }};
+new Chart(document.getElementById("results-chart"), {
+  type: "bar",
+  data: { labels: resultLabels, datasets: [{ label: "Votes", data: resultValues, backgroundColor: "#4b8cff", borderRadius: 8 }] },
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Confirm vote · CivicDemo{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <div class="page-heading"><div class="eyebrow">FINAL CONFIRMATION</div><h1>Review your selection</h1><p>Your submitted vote cannot be edited or withdrawn in this prototype.</p></div>
+  <div class="panel-card"><div class="candidate-avatar" aria-hidden="true">{{ candidate.name[:1] }}</div><p class="eyebrow mt-3">{{ election.title }}</p><h2>{{ candidate.name }}</h2><p class="text-secondary">{{ candidate.affiliation or "Independent" }}</p>
+    <form method="post" action="{{ url_for('voting.vote', election_id=election.id) }}" class="mt-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="candidate_id" value="{{ candidate.id }}">
+      <button class="btn btn-primary btn-lg" type="submit">Confirm and cast vote</button>
+      <a class="btn btn-outline-secondary btn-lg ms-2" href="{{ url_for('voter.candidates', election_id=election.id) }}">Go back</a>
+    </form>
+  </div>
+</div></div>
+{% endblock %}

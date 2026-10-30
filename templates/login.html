@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Voter sign in · CivicDemo{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7 col-lg-5">
+  <div class="page-heading"><div class="eyebrow">VOTER ACCESS</div><h1>Sign in</h1><p>Enter your password first. Face verification is a separate second step.</p></div>
+  <form method="post" class="panel-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="form-label" for="identifier">Voter ID or email</label><input class="form-control mb-3" id="identifier" name="identifier" autocomplete="username" required value="{{ request.form.get('identifier', '') }}">
+    <label class="form-label" for="password">Password</label><input class="form-control mb-4" id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn btn-primary w-100" type="submit">Continue to face verification</button>
+  </form>
+  <p class="text-secondary text-center mt-3">New to the demo? <a href="{{ url_for('auth.register') }}">Register an account</a>.</p>
+</div></div>
+{% endblock %}

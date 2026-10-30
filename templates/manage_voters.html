@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Manage voter access · CivicDemo{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">ADMINISTRATION</div><h1>Voter access</h1><p>Deactivate demo accounts when access should be revoked. Passwords and facial encodings are never shown here.</p></div>
+<div class="table-responsive panel-card p-0"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Name</th><th>Voter ID</th><th>Email</th><th>Status</th><th>Action</th></tr></thead><tbody>
+{% for voter in voters %}<tr><td>{{ voter.full_name }}</td><td>{{ voter.voter_id }}</td><td>{{ voter.email }}</td><td>{{ "Active" if voter.is_active else "Inactive" }}</td><td><form method="post" action="{{ url_for('admin.toggle_voter', user_id=voter.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-warning" type="submit">{{ "Deactivate" if voter.is_active else "Reactivate" }}</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="text-secondary">No voter accounts registered.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

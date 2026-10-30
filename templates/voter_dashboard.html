@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Voter dashboard · CivicDemo{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">VOTER DASHBOARD</div><h1>Hello, {{ current_user.full_name }}</h1><p>Demo voter ID: <strong>{{ current_user.voter_id }}</strong>. Your selected candidate is never displayed after submission.</p></div>
+<div class="row g-3 mb-4">
+  <div class="col-md-6"><div class="stat-card"><span>Account status</span><strong>Active</strong></div></div>
+  <div class="col-md-6"><div class="stat-card"><span>Available elections</span><strong>{{ elections|length }}</strong></div></div>
+</div>
+<h2 class="section-title">Elections</h2>
+{% if elections %}
+<div class="row g-3">{% for election in elections %}
+  <div class="col-lg-6"><article class="panel-card h-100">
+    <div class="d-flex justify-content-between gap-3"><h3 class="h5">{{ election.title }}</h3><span class="status-pill">{{ election_status_label(election, now) }}</span></div>
+    <p class="text-secondary">{{ election.description or "No description provided." }}</p>
+    <p class="small text-secondary">Opens {{ election.start_time }} UTC · Closes {{ election.end_time }} UTC</p>
+    {% if election.id in voted_ids %}
+      <span class="text-success fw-semibold">Vote recorded</span>
+    {% elif election.is_open_now(now) %}
+      <a class="btn btn-primary" href="{{ url_for('voter.candidates', election_id=election.id) }}">View candidates</a>
+    {% else %}
+      <button class="btn btn-outline-secondary" disabled>Voting unavailable</button>
+    {% endif %}
+    {% if election.publish_results or election.status == 'closed' %}<a class="btn btn-link" href="{{ url_for('results.public_results', election_id=election.id) }}">View results</a>{% endif %}
+  </article></div>
+{% endfor %}</div>
+{% else %}<div class="empty-state">No elections have been created yet.</div>{% endif %}
+{% endblock %}

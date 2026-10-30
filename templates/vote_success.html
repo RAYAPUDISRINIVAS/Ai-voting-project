@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Vote recorded · CivicDemo{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7 text-center">
+  <div class="success-mark" aria-hidden="true">✓</div><div class="eyebrow mt-4">SUBMISSION COMPLETE</div><h1>Your vote was recorded</h1>
+  <p class="text-secondary">The system will not reveal your selected candidate. The database links voter identity to a vote record, so this demonstration does not guarantee ballot secrecy.</p>
+  <a class="btn btn-primary mt-3" href="{{ url_for('voter.dashboard') }}">Return to dashboard</a>
+</div></div>
+{% endblock %}

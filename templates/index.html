@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}AI Voting System Prototype{% endblock %}
+{% block content %}
+<section class="hero row align-items-center g-5">
+  <div class="col-lg-7">
+    <div class="eyebrow">LEARN · TEST · UNDERSTAND</div>
+    <h1>A transparent classroom demo of a <span>digital voting workflow.</span></h1>
+    <p class="lead text-secondary mt-4">Explore voter registration, password-plus-face verification, election administration, and one-vote-per-election enforcement in a local prototype.</p>
+    <div class="d-flex flex-wrap gap-3 mt-4">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Create demo account</a>
+      <a class="btn btn-outline-light btn-lg" href="{{ url_for('auth.login') }}">Voter sign in</a>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="hero-card">
+      <div class="hero-icon">01</div><h2>Prototype, not polling infrastructure</h2>
+      <p>Facial matching is not proof of identity. This app lacks certified controls, independent audits, robust liveness detection, and guarantees of ballot secrecy.</p>
+      <a href="{{ url_for('auth.register') }}">Try the educational workflow <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+<section class="row g-3 mt-5">
+  <div class="col-md-4"><div class="info-card"><h3>Two-step sign in</h3><p>Password authentication followed by optional local facial matching.</p></div></div>
+  <div class="col-md-4"><div class="info-card"><h3>Server-enforced vote limit</h3><p>A database uniqueness constraint prevents a second vote for an election.</p></div></div>
+  <div class="col-md-4"><div class="info-card"><h3>Administrator controls</h3><p>Manage demo elections and candidates, then view aggregate results.</p></div></div>
+</section>
+{% endblock %}

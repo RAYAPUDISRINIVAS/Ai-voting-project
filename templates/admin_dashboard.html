@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard · CivicDemo{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">ADMINISTRATION</div><h1>Dashboard</h1><p>Manage demonstration elections and review aggregate participation. Never modify submitted ballots here.</p></div>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="stat-card"><span>Registered voters</span><strong>{{ total_voters }}</strong></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card"><span>Eligible accounts</span><strong>{{ active_voters }}</strong></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card"><span>Verified facial profiles</span><strong>{{ verified_voters }}</strong></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card"><span>Elections</span><strong>{{ elections|length }}</strong></div></div>
+</div>
+<div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-primary" href="{{ url_for('admin.elections') }}">Manage elections</a><a class="btn btn-outline-primary" href="{{ url_for('admin.candidates') }}">Manage candidates</a><a class="btn btn-outline-light" href="{{ url_for('admin.voters') }}">Manage voter access</a></div>
+<h2 class="section-title">Election participation</h2>
+<div class="table-responsive panel-card p-0"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Election</th><th>Status</th><th>Votes recorded</th><th>Results</th><th>Export</th></tr></thead><tbody>
+{% for election in elections %}<tr><td>{{ election.title }}</td><td>{{ election.status|title }}</td><td>{{ participation[election.id] }}</td><td><a href="{{ url_for('results.admin_results', election_id=election.id) }}">View</a></td><td><a href="{{ url_for('admin.export_results', election_id=election.id) }}">CSV</a></td></tr>
+{% else %}<tr><td colspan="5" class="text-secondary">No elections configured.</td></tr>{% endfor %}
+</tbody></table></div>
+<div class="row g-4 mt-2">
+  <div class="col-lg-6"><h2 class="section-title">Recent failed sign-ins</h2><div class="panel-card"><ul class="event-list">{% for attempt in failed_attempts %}<li><span>{{ attempt.reason|title }} verification failed</span><time>{{ attempt.occurred_at }}</time></li>{% else %}<li>No failed attempts recorded.</li>{% endfor %}</ul></div></div>
+  <div class="col-lg-6"><h2 class="section-title">Administrative audit log</h2><div class="panel-card"><ul class="event-list">{% for log in audit_logs %}<li><span>{{ log.action }} — {{ log.details }}</span><time>{{ log.created_at }}</time></li>{% else %}<li>No administrative actions recorded.</li>{% endfor %}</ul></div></div>
+</div>
+{% endblock %}

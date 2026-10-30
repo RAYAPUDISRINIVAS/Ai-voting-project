@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Access denied · CivicDemo{% endblock %}
+{% block content %}<div class="error-page"><div class="eyebrow">403</div><h1>Access denied</h1><p>You do not have permission to view this page or results are not published yet.</p><a class="btn btn-primary" href="{{ url_for('index') }}">Return home</a></div>{% endblock %}

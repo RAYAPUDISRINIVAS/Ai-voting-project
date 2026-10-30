@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Face verification · CivicDemo{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+  <div class="page-heading"><div class="eyebrow">SECOND FACTOR</div><h1>Verify your face</h1><p>Welcome, {{ user.full_name }}. Matching is approximate and must never be treated as proof of identity.</p></div>
+  <form method="post" class="panel-card" id="face-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="face_image" id="face-image">
+    {% include "partials/face_capture.html" %}
+    <div class="d-flex align-items-center gap-3 mt-4"><button class="btn btn-primary btn-lg" type="submit">Verify and continue</button><span class="text-secondary small" id="camera-status" aria-live="polite">No image captured yet.</span></div>
+  </form>
+</div></div>
+{% endblock %}

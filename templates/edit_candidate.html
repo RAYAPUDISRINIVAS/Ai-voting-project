@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Edit candidate · CivicDemo{% endblock %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">ADMINISTRATION</div><h1>Edit candidate</h1><p>{{ candidate.election.title }}</p></div>
+<form method="post" enctype="multipart/form-data" class="panel-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label class="form-label" for="name">Name</label><input class="form-control mb-3" id="name" name="name" maxlength="120" required value="{{ candidate.name }}">
+  <label class="form-label" for="affiliation">Party or affiliation</label><input class="form-control mb-3" id="affiliation" name="affiliation" maxlength="120" value="{{ candidate.affiliation }}">
+  {% if candidate.profile_image %}<img class="candidate-preview mb-3" src="{{ url_for('static', filename='uploads/candidates/' ~ candidate.profile_image) }}" alt="Current candidate profile image">{% endif %}
+  <label class="form-label" for="profile_image">Replace profile image <span class="text-secondary">(optional, JPEG/PNG up to 4 MB)</span></label><input class="form-control mb-3" type="file" id="profile_image" name="profile_image" accept="image/jpeg,image/png">
+  <label class="form-label" for="manifesto">Description or manifesto</label><textarea class="form-control mb-4" id="manifesto" name="manifesto" rows="5">{{ candidate.manifesto }}</textarea>
+  <button class="btn btn-primary" type="submit">Save changes</button> <a class="btn btn-outline-secondary" href="{{ url_for('admin.candidates') }}">Cancel</a>
+</form>
+{% endblock %}
