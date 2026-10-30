@@ -32,6 +32,7 @@ a:hover { color: #c1d5ff; }
 .site-nav { background: rgba(7, 17, 33, .85); border-bottom: 1px solid var(--line); }
 .navbar-brand { letter-spacing: -.04em; }
 .navbar-brand span { color: #79a9ff; }
+.home-link { margin-left: .5rem; }
 .hero { min-height: 430px; padding: 2rem 0; }
 .hero h1, .page-heading h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.08; letter-spacing: -.055em; font-weight: 750; }
 .hero h1 span { color: #79a9ff; }
@@ -99,4 +100,5 @@ a:hover { color: #c1d5ff; }
   .panel-card { padding: 1.1rem; }
   .hero { min-height: auto; }
   .prototype-banner { font-size: .63rem; }
+  .home-link { margin-left: auto; margin-right: .25rem; }
 }

@@ -32,6 +32,13 @@ def test_public_closed_election_results_render(client, app, election_and_candida
     assert b"Classroom Election" in response.data
 
 
+def test_home_page_is_available_from_registration_navigation(client):
+    response = client.get("/register")
+    assert response.status_code == 200
+    assert b'>Home</a>' in response.data
+    assert b'href="/"' in response.data
+
+
 def test_candidate_cannot_be_changed_during_open_election(client, app, election_and_candidate):
     sign_in_admin(client, app)
     _election_id, candidate_id = election_and_candidate
