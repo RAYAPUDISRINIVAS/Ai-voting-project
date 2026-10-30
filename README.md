@@ -126,6 +126,14 @@ python app.py
 
 Open <http://127.0.0.1:5000/>. The admin bootstrap prompts for an email, name, and a password of at least 14 characters. It runs only when Flask debug mode is enabled. Set `FLASK_DEBUG=0` when not actively developing. The Flask development server is for local testing only, not public production deployment.
 
+### Render demo deployment
+
+The root `render.yaml` defines a free Render web service and a free Render Postgres database. To deploy, connect the public GitHub repository to Render and create a Blueprint from `render.yaml`. During setup, enter values for `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_NAME`, and a unique `BOOTSTRAP_ADMIN_PASSWORD` of at least 14 characters. The password is only read to create the initial admin when no admin account exists; remove all three bootstrap variables from the Render service after the first successful deploy. The manifest generates `SECRET_KEY` and `FACE_DATA_KEY`; the face key is a high-entropy Render-generated secret from which the app derives a Fernet key. Changing the face key later makes already stored face encodings unreadable. Keep these values private.
+
+The first boot initializes tables and creates the first administrator. The app uses the attached Postgres connection, and the health check is `/`. Run only synthetic-data demonstrations. Render's free web services sleep while idle and have ephemeral local filesystems, so uploaded candidate images may disappear after a restart. Free Render Postgres databases expire after 30 days and are deleted after the additional grace period if not upgraded; they have no backups. This is not durable hosting and any data may be deleted. Do not enter real voter identities, facial data, or ballots. A real election requires a separately reviewed, non-free, production-grade system and expert security/privacy approval.
+
+The Render build installs `requirements.txt`; the optional `requirements-face.txt` is not installed by default because compiling `dlib` can fail or exceed free build resources. Until a compatible face-recognition library is deliberately installed, voter registration and face verification will clearly report that the dependency is unavailable. Do not bypass facial verification. The page can be publicly viewed, but do not use it to collect real personal or biometric data.
+
 ### Webcam and face recognition setup
 
 The browser asks permission to use a webcam on localhost. If camera access is blocked, select a JPEG/PNG image (up to 4 MB) instead. Images are sent for in-memory processing and are not written to disk. The app requires one visible face and applies a configurable Euclidean distance threshold (`FACE_DISTANCE_THRESHOLD`, default `0.48`); a lower value is stricter but can increase false rejection.

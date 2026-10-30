@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -39,6 +40,48 @@ def create_app(config_object=None):
             event.listen(engine, "connect", enable_sqlite_foreign_keys)
 
     from models import User
+
+    bootstrap_admin_email = os.environ.get("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
+    bootstrap_admin_name = os.environ.get("BOOTSTRAP_ADMIN_NAME", "").strip()
+    bootstrap_admin_password = os.environ.get("BOOTSTRAP_ADMIN_PASSWORD", "")
+    bootstrap_values = (bootstrap_admin_email, bootstrap_admin_name, bootstrap_admin_password)
+    if any(bootstrap_values):
+        if not all(bootstrap_values):
+            raise RuntimeError(
+                "BOOTSTRAP_ADMIN_EMAIL, BOOTSTRAP_ADMIN_NAME, and "
+                "BOOTSTRAP_ADMIN_PASSWORD must all be configured together."
+            )
+        if len(bootstrap_admin_password) < 14:
+            raise RuntimeError("BOOTSTRAP_ADMIN_PASSWORD must contain at least 14 characters.")
+        if (
+            len(bootstrap_admin_name) > 120
+            or len(bootstrap_admin_email) > 254
+            or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", bootstrap_admin_email)
+        ):
+            raise RuntimeError("Bootstrap administrator name or email is invalid.")
+        if not app.config.get("TESTING"):
+            with app.app_context():
+                db.create_all()
+                existing_admin = User.query.filter_by(role="admin").first()
+                if existing_admin is None:
+                    if User.query.filter_by(email=bootstrap_admin_email).first():
+                        raise RuntimeError("Bootstrap administrator email is already in use.")
+                    admin = User(
+                        full_name=bootstrap_admin_name[:120],
+                        email=bootstrap_admin_email,
+                        role="admin",
+                    )
+                    admin.set_password(bootstrap_admin_password)
+                    db.session.add(admin)
+                    db.session.commit()
+                    app.logger.warning(
+                        "Created the one-time bootstrap administrator. Remove "
+                        "BOOTSTRAP_ADMIN_* variables from the deployment environment."
+                    )
+                else:
+                    app.logger.info(
+                        "An administrator already exists; bootstrap credentials were not used."
+                    )
 
     @login_manager.user_loader
     def load_user(user_id):

@@ -1,11 +1,15 @@
 from datetime import timedelta
 
+from pathlib import Path
+
 from sqlalchemy import text
 
 from extensions import db
 from models import Candidate, Election, User, Vote, utcnow
 from results import aggregate_results
 from admin import _csv_text
+from app import create_app
+from config import TestConfig
 
 
 def test_unauthorized_admin_dashboard_is_rejected(client):
@@ -84,3 +88,20 @@ def test_csv_text_is_safe_from_spreadsheet_formulas():
 def test_sqlite_foreign_keys_are_enabled(app):
     with app.app_context():
         assert db.session.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
+
+
+def test_one_time_admin_bootstrap_uses_configured_secret(tmp_path, monkeypatch):
+    class BootstrapConfig(TestConfig):
+        TESTING = False
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{Path(tmp_path) / 'bootstrap.db'}"
+
+    monkeypatch.setenv("BOOTSTRAP_ADMIN_EMAIL", "bootstrap@example.test")
+    monkeypatch.setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Admin")
+    monkeypatch.setenv("BOOTSTRAP_ADMIN_PASSWORD", "long-random-bootstrap-password")
+    app = create_app(BootstrapConfig)
+    with app.app_context():
+        admin = User.query.filter_by(role="admin").one()
+        assert admin.email == "bootstrap@example.test"
+        assert admin.check_password("long-random-bootstrap-password")
+        db.session.remove()
+        db.drop_all()

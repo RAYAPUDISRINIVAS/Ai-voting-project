@@ -1,5 +1,5 @@
-import os
 import base64
+import os
 from pathlib import Path
 
 
@@ -8,7 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///ai_voting.db")
+    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///ai_voting.db")
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
     SESSION_COOKIE_HTTPONLY = True

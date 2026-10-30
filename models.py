@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+import base64
+import hashlib
 
 from cryptography.fernet import Fernet, InvalidToken
 from flask import current_app
@@ -53,10 +55,15 @@ class FaceProfile(db.Model):
         key = current_app.config.get("FACE_DATA_KEY")
         if not key:
             raise RuntimeError("FACE_DATA_KEY is required to store or verify facial data.")
+        raw_key = key.encode("utf-8") if isinstance(key, str) else key
         try:
-            return Fernet(key.encode("ascii") if isinstance(key, str) else key)
-        except (ValueError, TypeError) as exc:
-            raise RuntimeError("FACE_DATA_KEY is invalid; generate a Fernet key.") from exc
+            return Fernet(raw_key)
+        except (ValueError, TypeError):
+            derived_key = base64.urlsafe_b64encode(hashlib.sha256(raw_key).digest())
+            try:
+                return Fernet(derived_key)
+            except (ValueError, TypeError) as exc:
+                raise RuntimeError("FACE_DATA_KEY is invalid; generate a secure key.") from exc
 
     @classmethod
     def from_encoding(cls, user_id, encoding):

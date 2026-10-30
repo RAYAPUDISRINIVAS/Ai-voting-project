@@ -45,3 +45,10 @@ def test_password_confirmation_is_validated(client, app):
     assert b"Passwords do not match" in response.data
     with app.app_context():
         assert User.query.count() == 0
+
+
+def test_render_style_random_face_secret_can_encrypt_profile(app):
+    with app.app_context():
+        app.config["FACE_DATA_KEY"] = "render-generated-secret-value"
+        profile = FaceProfile.from_encoding(1, [0.2, 0.4])
+        assert profile.get_encoding().tolist() == [0.2, 0.4]
