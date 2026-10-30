@@ -6,12 +6,19 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def normalize_database_url(database_url):
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return database_url
+
+
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
-    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///ai_voting.db")
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    SQLALCHEMY_DATABASE_URI = normalize_database_url(
+        os.environ.get("DATABASE_URL", "sqlite:///ai_voting.db")
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
     SESSION_COOKIE_HTTPONLY = True

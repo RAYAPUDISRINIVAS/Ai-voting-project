@@ -9,7 +9,7 @@ from models import Candidate, Election, User, Vote, utcnow
 from results import aggregate_results
 from admin import _csv_text
 from app import create_app
-from config import TestConfig
+from config import TestConfig, normalize_database_url
 
 
 def test_unauthorized_admin_dashboard_is_rejected(client):
@@ -105,3 +105,13 @@ def test_one_time_admin_bootstrap_uses_configured_secret(tmp_path, monkeypatch):
         assert admin.check_password("long-random-bootstrap-password")
         db.session.remove()
         db.drop_all()
+
+
+def test_postgres_urls_select_installed_psycopg2_driver():
+    assert normalize_database_url("postgres://user:pass@host/db") == (
+        "postgresql+psycopg2://user:pass@host/db"
+    )
+    assert normalize_database_url("postgresql://user:pass@host/db") == (
+        "postgresql+psycopg2://user:pass@host/db"
+    )
+    assert normalize_database_url("sqlite:///demo.db") == "sqlite:///demo.db"
